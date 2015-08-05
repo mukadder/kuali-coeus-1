@@ -160,7 +160,6 @@ function compile_kuali {
 	# BUILD KUALI COEUS
 	cd ${KC_PROJECT_FOLDER}
 	
-		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 
 	
 		mvn install:install-file -Dfile=${SETUP_FILES_FOLDER}/${ORACLE_DRIVER_NAME} -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=10.2.0.3.0 -Dpackaging=jar
