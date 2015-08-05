@@ -6,7 +6,9 @@ TOMCAT_VERSION="8.0.22"
 KC_PROJECT_VERSION="1507"
 MYSQL_CONNECTOR_VERSION="5.1.34"
 SPRING_INSTRUMENTATION_TOMCAT_VERSION="3.2.12"
-
+# Oracle Settings
+SETUP_FILES_FOLDER="${CURRENT_WORKING_DIR}/setup_files"
+ORACLE_DRIVER_NAME="ojdbc6.jar"
 if [ -f "/etc/redhat-release" ]; then
 	LINUX_DISTRIBUTION=$(grep -Eo "(Red Hat|CentOS)" /etc/redhat-release)
 fi
