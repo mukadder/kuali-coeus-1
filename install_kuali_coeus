@@ -833,10 +833,10 @@ function main_menu {
 			
 			echo "Setting up tomcat"
 			sleep 1
-			setup_tomcat
+			
 			echo "Setting and starting the KC application"
 			sleep 1
-			setup_kc_application
+			
 			;;
 
 		[2] )
