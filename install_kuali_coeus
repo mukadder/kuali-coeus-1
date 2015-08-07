@@ -209,16 +209,10 @@ function compile_kuali {
 	echo
 	echo "Copying a copy of the war file to the ${CURRENT_WORKING_DIR}/DOWNLOADS folder"
 	mkdir -p ${CURRENT_WORKING_DIR}/DOWNLOADS
+	mkdir -p ${CURRENT_WORKING_DIR}/kcdev
+	cp ${CURRENT_WORKING_DIR}/workspace/kc/coeus-webapp/target/coeus-webapp-${KC_PROJECT_VER}.war ${CURRENT_WORKING_DIR}/kcdev/${KC_PROJECT_WAR_NAME}
 	cp ${CURRENT_WORKING_DIR}/workspace/kc/coeus-webapp/target/coeus-webapp-${KC_PROJECT_VER}.war ${CURRENT_WORKING_DIR}/DOWNLOADS/${KC_PROJECT_WAR_NAME}
-	echo
-	echo "Creating a copy of the XML file to ingest in the ${CURRENT_WORKING_DIR}/DOWNLOADS folder"
-	sleep 3
-	rm -f ${CURRENT_WORKING_DIR}/DOWNLOADS/rice-xml-${KC_PROJECT_VERSION}.zip
-	rm -f ${CURRENT_WORKING_DIR}/DOWNLOADS/coeus-xml-${KC_PROJECT_VERSION}.zip
-	jar xf ${CURRENT_WORKING_DIR}/workspace/kc/coeus-db/coeus-db-xml/target/coeus-db-xml-${KC_PROJECT_VER}.jar
-	zip -r ${CURRENT_WORKING_DIR}/DOWNLOADS/rice-xml-${KC_PROJECT_VERSION}.zip org/kuali/coeus/rice-xml/
-	zip -r ${CURRENT_WORKING_DIR}/DOWNLOADS/coeus-xml-${KC_PROJECT_VERSION}.zip org/kuali/coeus/coeus-xml/
-	rm -fr META-INF org
+	
 }
 
 function install_build_packages {
