@@ -94,19 +94,8 @@ function clone_kuali_coeus {
 }
 
 function compile_kuali {
-	if [ "$mysql_or_oracle" -eq "2" ]; then
-		if [ -f ${SETUP_FILES_FOLDER}/${ORACLE_DRIVER_NAME} ]; then                                                      
-			echo " Good. Found your Oracle driver, ${ORACLE_DRIVER_NAME} in ${SETUP_FILES_FOLDER}"                   
-		else                                                                                                             
-			echo                                                                                                     
-			echo "I can't find your Oracle driver, ${ORACLE_DRIVER_NAME}, in ${SETUP_FILES_FOLDER}"                  
-			echo                                                                                                     
-			echo "Either copy your Oracle driver, ${ORACLE_DRIVER_NAME}, in ${SETUP_FILES_FOLDER}"                   
-			echo "or set 'ORACLE_DRIVER_NAME' in this script. "                                                      
-			echo                                                                                                     
-			exit                                                                                                     
-		fi
-	fi
+	
+	
 	# Clone the Kuali Project
 	clone_kuali_coeus
 
@@ -183,28 +172,14 @@ function compile_kuali {
 
 	# BUILD KUALI COEUS
 	cd ${KC_PROJECT_FOLDER}
-	if [ "$mysql_or_oracle" -eq "1" ]; then
-		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
-	fi
-	if [ "$mysql_or_oracle" -eq "2" ]; then
-		mvn install:install-file -Dfile=${SETUP_FILES_FOLDER}/${ORACLE_DRIVER_NAME} -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=10.2.0.3.0 -Dpackaging=jar
-		mvn -P oracle clean compile source:jar javadoc:jar install -Dgrm.off=true
-	fi
+	
 
-	# Create a copy of the war file and the XML file to ingest
-	echo
+	
 	echo "Copying a copy of the war file to the ${CURRENT_WORKING_DIR}/DOWNLOADS folder"
 	mkdir -p ${CURRENT_WORKING_DIR}/DOWNLOADS
 	cp ${CURRENT_WORKING_DIR}/workspace/kc/coeus-webapp/target/coeus-webapp-${KC_PROJECT_VER}.war ${CURRENT_WORKING_DIR}/DOWNLOADS/${KC_PROJECT_WAR_NAME}
 	echo
-	echo "Creating a copy of the XML file to ingest in the ${CURRENT_WORKING_DIR}/DOWNLOADS folder"
-	sleep 3
-	rm -f ${CURRENT_WORKING_DIR}/DOWNLOADS/rice-xml-${KC_PROJECT_VERSION}.zip
-	rm -f ${CURRENT_WORKING_DIR}/DOWNLOADS/coeus-xml-${KC_PROJECT_VERSION}.zip
-	jar xf ${CURRENT_WORKING_DIR}/workspace/kc/coeus-db/coeus-db-xml/target/coeus-db-xml-${KC_PROJECT_VER}.jar
-	zip -r ${CURRENT_WORKING_DIR}/DOWNLOADS/rice-xml-${KC_PROJECT_VERSION}.zip org/kuali/coeus/rice-xml/
-	zip -r ${CURRENT_WORKING_DIR}/DOWNLOADS/coeus-xml-${KC_PROJECT_VERSION}.zip org/kuali/coeus/coeus-xml/
-	rm -fr META-INF org
+	
 }
 
 function install_this_package () {
@@ -807,32 +782,27 @@ function main_menu {
 		[1] )
 			echo
 			clean_up_system
-			ask_user_information
+			
 
 			echo "Compiling and Installing Kuali Coeus for you"
 			echo "============================================"
 			echo "Installing Packages"
 			sleep 1
-			install_build_packages
-			install_packages
+			
+			
 			echo "Compiling Kuali Coeus"
 			sleep 1
 			compile_kuali
 			echo "Stopping the firewall"
 			sleep 1
-			stop_firewall
-			echo "Checking/Installing database"
+			
+			
 			sleep 1
 			clone_kuali_coeus
-			echo "Setting the Kuali Coeus Database"
-			sleep 1
-			# Make sure that sqlplus is installed for oracle
-			if [ "$mysql_or_oracle" -eq "2" ]; then
-				command -v sqlplus64 >/dev/null 2>&1 || { echo >&2 "Couldn't find sqlplus64 on your system. Installing it: "; install_sqlplus; }
-			fi
 			
-			echo "Setting up tomcat"
-			sleep 1
+			
+			
+			
 			
 			echo "Setting and starting the KC application"
 			sleep 1
