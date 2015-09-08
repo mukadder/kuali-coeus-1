@@ -5,9 +5,33 @@
 		# mysql -u${KC_DB_USERNAME} -p${KC_DB_PASSWORD} ${KC_DB_NAME} < grm/V602_011__jasper_feature_flag.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/V602_011__JASPER_FEATURE_FLAG.log 2>&1
 
 
+function install_this_package () {
+	if [ -f /etc/debian_version ]; then
+		apt-get update
+		apt-get install -y $1
+	elif [ -f /etc/redhat-release ]; then
+		yum install -y $1
+	fi
+}
+
+function check_if_package_is_installed () {
+	command -v $1 >/dev/null 2>&1 || { echo >&2 "Couldn't find $1 on your system. Installing it: "; install_this_package $1; }
+}
+
+# Make sure only root can run our script
+# if [[ $EUID -ne 0 ]]; then
+#   echo
+#   echo "This script must be run as root" 1>&2
+#   echo
+#   exit 1
+# else
+#   check_if_package_is_installed curl
+# fi
+
 #DEFINE
+check_if_package_is_installed curl
 TOMCAT_MAJOR="8"
-KC_PROJECT_VERSION=$(curl -s https://raw.githubusercontent.com/kuali/kc/master/pom.xml | egrep -m 1 "<version>" | sed 's/<version>//' | sed 's/\..*//' | awk '{print $1}')
+KC_PROJECT_VERSION=$(curl -s https://raw.githubusercontent.com/mukadder/kc/master/pom.xml | egrep -m 1 "<version>" | sed 's/<version>//' | sed 's/\..*//' | awk '{print $1}')
 MYSQL_CONNECTOR_VERSION="5.1.34"
 
 
@@ -56,7 +80,7 @@ CLEANUP_LOCATIONS="/opt/apache-tomcat /opt/kuali ${CURRENT_WORKING_DIR}/SQL_LOGS
 # Kuali Project
 KC_PROJECT_WAR_NAME="kc-dev.war"
 KC_PROJECT_FOLDER="${CURRENT_WORKING_DIR}/workspace/kc"
-KC_PROJECT_LINK="https://github.com/kuali/kc"
+KC_PROJECT_LINK="https://github.com/mukadder/kc"
 KC_PROJECT_RICE_XML="http://www.kuali.erafiki.com/${KC_PROJECT_VERSION}/xml_files/rice-xml-${KC_PROJECT_VERSION}.zip"
 KC_PROJECT_COEUS_XML="http://www.kuali.erafiki.com/${KC_PROJECT_VERSION}/xml_files/coeus-xml-${KC_PROJECT_VERSION}.zip"
 # SchemaSpy Project
@@ -73,19 +97,6 @@ KC_S2SGEN_PROJECT_FORLDER="${CURRENT_WORKING_DIR}/workspace/kc-s2sgen"
 KC_S2SGEN_PROJECT_LINK="https://github.com/kuali/kc-s2sgen"
 
 # FUNCTIONS
-function install_this_package () {
-	if [ -f /etc/debian_version ]; then
-		apt-get update
-		apt-get install -y $1
-	elif [ -f /etc/redhat-release ]; then
-		yum install -y $1
-	fi
-}
-
-function check_if_package_is_installed () {
-	command -v $1 >/dev/null 2>&1 || { echo >&2 "Couldn't find $1 on your system. Installing it: "; install_this_package $1; }
-}
-
 function clone_kuali_coeus {
 	if [ -d ${KC_PROJECT_FOLDER} ]; then
 		echo
@@ -135,14 +146,14 @@ function compile_kuali {
 	if [ -d ${SCHEMASPY_PROJECT_FORLDER} ]; then
 		cd ${SCHEMASPY_PROJECT_FORLDER}
 		git checkout tags/schemaspy-${SCHEMASPY_PROJECT_VER}
-		mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	else
 		mkdir -p ${CURRENT_WORKING_DIR}/workspace
 		cd ${CURRENT_WORKING_DIR}/workspace
 		git clone ${SCHEMASPY_PROJECT_LINK}
 		cd ${SCHEMASPY_PROJECT_FORLDER}
 		git checkout tags/schemaspy-${SCHEMASPY_PROJECT_VER}
-		mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	fi
 
 	cd ..
@@ -151,14 +162,14 @@ function compile_kuali {
 	if [ -d ${KC_RICE_PROJECT_FORLDER} ]; then
 		cd ${KC_RICE_PROJECT_FORLDER}
 		git checkout tags/rice-${KC_RICE_PROJECT_VER}
-		mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	else
 		mkdir -p ${CURRENT_WORKING_DIR}/workspace
 		cd ${CURRENT_WORKING_DIR}/workspace
 		git clone ${KC_RICE_PROJECT_LINK}
 		cd ${KC_RICE_PROJECT_FORLDER}
 		git checkout tags/rice-${KC_RICE_PROJECT_VER}
-	mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	fi
 
 	cd ..
@@ -167,14 +178,14 @@ function compile_kuali {
 	if [ -d ${KC_API_PROJECT_FORLDER} ]; then
 		cd ${KC_API_PROJECT_FORLDER}
 		git checkout tags/coeus-api-${KC_API_PROJECT_VER}
-		mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	else
 		mkdir -p ${CURRENT_WORKING_DIR}/workspace
 		cd ${CURRENT_WORKING_DIR}/workspace
 		git clone ${KC_API_PROJECT_LINK}
 		cd ${KC_API_PROJECT_FORLDER}
 		git checkout tags/coeus-api-${KC_API_PROJECT_VER}
-		mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	fi
 
 	cd ..
@@ -183,14 +194,14 @@ function compile_kuali {
 	if [ -d ${KC_S2SGEN_PROJECT_FORLDER} ]; then
 		cd ${KC_S2SGEN_PROJECT_FORLDER}
 		git checkout tags/coeus-s2sgen-${KC_S2SGEN_PROJECT_VER}
-		mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	else
 		mkdir -p ${CURRENT_WORKING_DIR}/workspace
 		cd ${CURRENT_WORKING_DIR}/workspace
 		git clone ${KC_S2SGEN_PROJECT_LINK}
 		cd ${KC_S2SGEN_PROJECT_FORLDER}
 		git checkout tags/coeus-s2sgen-${KC_S2SGEN_PROJECT_VER}
-		mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	fi
 
 	cd ..
@@ -198,7 +209,7 @@ function compile_kuali {
 	# BUILD KUALI COEUS
 	cd ${KC_PROJECT_FOLDER}
 	if [ "$mysql_or_oracle" -eq "1" ]; then
-		mvn -DskipTests clean install -Dgrm.off=true
+		mvn clean compile source:jar javadoc:jar install -Dgrm.off=true
 	fi
 	if [ "$mysql_or_oracle" -eq "2" ]; then
 		mvn install:install-file -Dfile=${SETUP_FILES_FOLDER}/${ORACLE_DRIVER_NAME} -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2 -Dpackaging=jar
@@ -209,10 +220,16 @@ function compile_kuali {
 	echo
 	echo "Copying a copy of the war file to the ${CURRENT_WORKING_DIR}/DOWNLOADS folder"
 	mkdir -p ${CURRENT_WORKING_DIR}/DOWNLOADS
-	mkdir -p ${CURRENT_WORKING_DIR}/kcdev
-	cp ${CURRENT_WORKING_DIR}/workspace/kc/coeus-webapp/target/coeus-webapp-${KC_PROJECT_VER}.war ${CURRENT_WORKING_DIR}/kcdev/${KC_PROJECT_WAR_NAME}
 	cp ${CURRENT_WORKING_DIR}/workspace/kc/coeus-webapp/target/coeus-webapp-${KC_PROJECT_VER}.war ${CURRENT_WORKING_DIR}/DOWNLOADS/${KC_PROJECT_WAR_NAME}
-	
+	echo
+	echo "Creating a copy of the XML file to ingest in the ${CURRENT_WORKING_DIR}/DOWNLOADS folder"
+	sleep 3
+	rm -f ${CURRENT_WORKING_DIR}/DOWNLOADS/rice-xml-${KC_PROJECT_VERSION}.zip
+	rm -f ${CURRENT_WORKING_DIR}/DOWNLOADS/coeus-xml-${KC_PROJECT_VERSION}.zip
+	jar xf ${CURRENT_WORKING_DIR}/workspace/kc/coeus-db/coeus-db-xml/target/coeus-db-xml-${KC_PROJECT_VER}.jar
+	zip -r ${CURRENT_WORKING_DIR}/DOWNLOADS/rice-xml-${KC_PROJECT_VERSION}.zip org/kuali/coeus/rice-xml/
+	zip -r ${CURRENT_WORKING_DIR}/DOWNLOADS/coeus-xml-${KC_PROJECT_VERSION}.zip org/kuali/coeus/coeus-xml/
+	rm -fr META-INF org
 }
 
 function install_build_packages {
@@ -413,6 +430,11 @@ function setup_kc_application {
 	if [ -f ${KC_PROJECT_WAR_NAME} ]; then
 		echo "Found ${KC_PROJECT_WAR_NAME}"
 	else
+		if [ "$mysql_or_oracle" -eq "1" ]; then
+			KC_PROJECT_WAR_LINK="http://www.kuali.erafiki.com/${KC_PROJECT_VERSION}/mysql/kc-dev.war"
+		elif [ "$mysql_or_oracle" -eq "2" ]; then
+			KC_PROJECT_WAR_LINK="http://www.kuali.erafiki.com/${KC_PROJECT_VERSION}/oracle/kc-dev.war"
+		fi
 		wget ${KC_PROJECT_WAR_LINK} -O ${KC_PROJECT_WAR_NAME}
 	fi
 
@@ -492,7 +514,7 @@ function exec_sql_scripts() {
 	echo
 	if [ "$mysql_or_oracle" -eq "1" ]; then
 		cd ${MYSQL_SQL_FILES_FOLDER}
-		INSTALL_SQL_VERSION=( $(ls -v *.sql | grep -v INSTALL_TEMPLATE | sed 's/_.*//g' | uniq ) )
+		INSTALL_SQL_VERSION=( $(ls -v *.sql | grep -v INSTALL_TEMPLATE | sed 's/_.*//g' | uniq | sort -n ) )
 		for version in ${INSTALL_SQL_VERSION[@]:${1}}
 		do
 			# INSTALL THE MYSQL FILES
@@ -500,9 +522,9 @@ function exec_sql_scripts() {
 			if [ -f ${version}_mysql_rice_server_upgrade.sql ]; then
 				mysql -u${KC_DB_USERNAME} -p${KC_DB_PASSWORD} ${KC_DB_NAME} < ${version}_mysql_rice_server_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_MYSQL_RICE_SERVER_UPGRADE.log 2>&1
 			fi
-			if [ -f ${version}_mysql_rice_client_upgrade.sql ]; then
-				mysql -u${KC_DB_USERNAME} -p${KC_DB_PASSWORD} ${KC_DB_NAME} < ${version}_mysql_rice_client_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_MYSQL_RICE_CLIENT_UPGRADE.log 2>&1
-			fi
+			# if [ -f ${version}_mysql_rice_client_upgrade.sql ]; then
+			# 	mysql -u${KC_DB_USERNAME} -p${KC_DB_PASSWORD} ${KC_DB_NAME} < ${version}_mysql_rice_client_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_MYSQL_RICE_CLIENT_UPGRADE.log 2>&1
+			# fi
 			if [ -f ${version}_mysql_kc_rice_server_upgrade.sql ]; then
 				mysql -u${KC_DB_USERNAME} -p${KC_DB_PASSWORD} ${KC_DB_NAME} < ${version}_mysql_kc_rice_server_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_MYSQL_KC_RICE_SERVER_UPGRADE.log 2>&1
 			fi
@@ -525,17 +547,17 @@ function exec_sql_scripts() {
 		fi
 	elif [ "$mysql_or_oracle" -eq "2" ]; then
 		cd ${ORACLE_SQL_FILES_FOLDER}
-		INSTALL_SQL_VERSION=( $(ls -v *.sql | grep -v INSTALL_TEMPLATE | sed 's/_.*//g' | uniq ) )
+		INSTALL_SQL_VERSION=( $(ls -v *.sql | grep -v INSTALL_TEMPLATE | sed 's/_.*//g' | uniq | sort -n ) )
 		for version in ${INSTALL_SQL_VERSION[@]:${1}}
 		do
-			# INSTALL THE MYSQL FILES
+			# INSTALL THE ORACLE SQL FILES
 			echo "Installing/upgrading to version ${version}"
 			if [ -f ${version}_oracle_rice_server_upgrade.sql ]; then
 				sqlplus ${KC_DB_USERNAME}/${KC_DB_PASSWORD}@${KC_DB_NAME} < ${version}_oracle_rice_server_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_ORACLE_RICE_SERVER_UPGRADE.log 2>&1
 			fi
-			if [ -f ${version}_oracle_rice_client_upgrade.sql ]; then
-				sqlplus ${KC_DB_USERNAME}/${KC_DB_PASSWORD}@${KC_DB_NAME} < ${version}_oracle_rice_client_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_ORACLE_RICE_CLIENT_UPGRADE.log 2>&1
-			fi
+			# if [ -f ${version}_oracle_rice_client_upgrade.sql ]; then
+			# 	sqlplus ${KC_DB_USERNAME}/${KC_DB_PASSWORD}@${KC_DB_NAME} < ${version}_oracle_rice_client_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_ORACLE_RICE_CLIENT_UPGRADE.log 2>&1
+			# fi
 			if [ -f ${version}_oracle_kc_rice_server_upgrade.sql ]; then
 				sqlplus ${KC_DB_USERNAME}/${KC_DB_PASSWORD}@${KC_DB_NAME} < ${version}_oracle_kc_rice_server_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_ORACLE_KC_RICE_SERVER_UPGRADE.log 2>&1
 			fi
@@ -543,7 +565,7 @@ function exec_sql_scripts() {
 				sqlplus ${KC_DB_USERNAME}/${KC_DB_PASSWORD}@${KC_DB_NAME} < ${version}_oracle_kc_upgrade.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_ORACLE_KC_UPGRADE.log 2>&1
 			fi
 			# INSTALL THE DEMO FILES
-			if [ "${INSTALL_KC_DEMO}" -eq "2" ]; then
+			if [ "${INSTALL_KC_DEMO}" -eq "1" ]; then
 				if [ -f ${version}_oracle_rice_demo.sql ]; then
 					sqlplus ${KC_DB_USERNAME}/${KC_DB_PASSWORD}@${KC_DB_NAME} < ${version}_oracle_rice_demo.sql > ${CURRENT_WORKING_DIR}/SQL_LOGS/${version}_ORACLE_RICE_DEMO.log 2>&1
 				fi
