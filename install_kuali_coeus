@@ -838,7 +838,7 @@ function main_menu {
 	echo "  7) Exit"
 	echo
 	echo -n "===> "
-	read 1
+	read "1"
 	case $kuali_option in
 		[1] )
 			echo
