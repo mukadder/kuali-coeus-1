@@ -663,7 +663,7 @@ function ask_user_information {
 	echo "  3) Go back to Main Menu"
 	echo
 	echo -n "===> "
-	read mysql_or_oracle
+	read 1
 	echo
 	echo "Would you like me to install the Demo Data too?"
 	echo "  1) Yes"
@@ -838,7 +838,7 @@ function main_menu {
 	echo "  7) Exit"
 	echo
 	echo -n "===> "
-	read kuali_option
+	read 1
 	case $kuali_option in
 		[1] )
 			echo
